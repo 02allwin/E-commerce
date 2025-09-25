@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Event Finder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-r from-purple-100 to-pink-100 min-h-screen">
+
+    <!-- 🌟 Navigation Bar -->
+    <nav class="bg-white shadow-lg">
+        <div class="container mx-auto flex justify-between items-center py-4 px-6">
+            <a href="#" class="text-2xl font-bold text-pink-500">Event-Finder</a>
+            <ul class="flex space-x-6">
+                <li><a href="#" class="text-gray-700 hover:text-pink-500">Home</a></li>
+                <li><a href="services.html" class="text-gray-700 hover:text-pink-500">Services</a></li>
+                <li><a href="view_booking_list.html" class="text-gray-700 hover:text-pink-500">Bookings</a></li>
+                <li><a href="#" class="text-gray-700 hover:text-pink-500">About</a></li>
+                <li><a href="#" class="text-gray-700 hover:text-pink-500">Contact</a></li>
+           </ul>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        {% if bookings %}
+            <div class="overflow-x-auto">
+                <table class="w-full bg-white shadow-md rounded-lg overflow-hidden">
+                    <thead class="bg-pink-500 text-white uppercase text-sm">
+                        <tr>
+                            <th class="py-3 px-6 text-left">Booking ID</th>
+                            <th class="py-3 px-6 text-left">Service Image</th>
+                            <th class="py-3 px-6 text-left">Service Name</th>
+                            <th class="py-3 px-6 text-left">Event Date</th>
+                            <th class="py-3 px-6 text-left">Event Time</th>
+                            <th class="py-3 px-6 text-left">Event Location</th>
+                            <th class="py-3 px-6 text-left">Event Price</th>
+                            <th class="py-3 px-6 text-left">Booking Status</th>
+                            <th class="py-3 px-6 text-left">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for booking in bookings %}
+                        <tr class="hover:bg-gray-100 transition">
+                            <td class="py-4 px-6">{{ booking.booking_id }}</td>
+                            <td class="py-4 px-6">
+                                <img src="{{ booking.service_image }}" alt="Service Image" class="h-16 w-16 object-cover rounded-lg shadow">
+                               </td>
+                            <td class="py-4 px-6">{{ booking.service_name }}</td>
+                            <td class="py-4 px-6">{{ booking.booking_date }}</td>
+                            <td class="py-4 px-6">{{ booking.booking_time }}</td>
+                            <td class="py-4 px-6">{{ booking.booking_location }}</td>
+                            <td class="py-4 px-6 font-semibold text-green-500">${{ booking.booking_price }}</td>
+                            <td class="py-4 px-6">
+                                <span class="px-3 py-1 rounded-lg text-white text-xs font-semibold 
+                                {% if booking.booking_status == 'Confirmed' %} bg-green-500 
+                                {% elif booking.booking_status == 'Pending' %} bg-yellow-500 
+                                {% else %} bg-red-500 {% endif %}">
+                                    {{ booking.booking_status }}
+                                </span>
+                            </td>
+                            <td class="py-4 px-6">
+                               <a href="{% url 'delete_booking' booking.booking_id %}">
+                                <span class="px-3 py-1 rounded-lg text-white text-xs font-semibold bg-red-500">
+                                    DELETE
+                                </span>
+                               </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <h1 class="text-3xl font-bold text-center mt-12">No bookings found</h1>
+        {% endif %}
+    </div>
+
+   
+
+</body>
+</html>

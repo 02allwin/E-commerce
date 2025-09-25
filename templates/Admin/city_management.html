@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Cities</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f6f8;
+        }
+        .container {
+            max-width: 850px;
+        }
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container my-5">
+    <h2 class="text-center mb-4">City Management</h2>
+
+    <!-- Add City Form -->
+    <div class="card p-4 mb-4">
+        <form method="post" class="row g-3">
+            {% csrf_token %}
+            <div class="col-md-5">
+                <input type="text" name="city_name" class="form-control" placeholder="City Name" required>
+            </div>
+            <div class="col-md-5">
+                <input type="text" name="city_pincode" class="form-control" placeholder="City Pincode" required>
+            </div>
+            <div class="col-md-2 d-grid">
+                <button type="submit" class="btn btn-success">Add</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Cities Table -->
+    <div class="card p-4">
+        <h5 class="mb-3">City List</h5>
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>City ID</th>
+                    <th>City Name</th>
+                    <th>City Pincode</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for city in cities %}
+                <tr>
+                    <td>{{ city.id }}</td>
+                    <td>{{ city.name }}</td>
+                    <td>{{ city.pincode }}</td>
+                    <td class="text-center">
+                        <a href="{% url 'delete_city' city.id %}" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">No cities available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+django
+mysql
+mysql-connector
+pandas
+calplot
+numpy

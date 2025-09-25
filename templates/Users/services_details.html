@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Details - Local Event Finder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-r from-blue-50 to-purple-100 min-h-screen">
+
+    <!-- 🌟 Navigation Bar -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto flex justify-between items-center py-4 px-6">
+            <a href="#" class="text-2xl font-bold text-blue-600">Event-Finder</a>
+            <ul class="flex space-x-6">
+                <li><a href="#" class="text-gray-700 hover:text-pink-500">Home</a></li>
+                <li><a href="services.html" class="text-gray-700 hover:text-pink-500">Services</a></li>
+                <li><a href="view_booking_list.html" class="text-gray-700 hover:text-pink-500">Bookings</a></li>
+                <li><a href="#" class="text-gray-700 hover:text-pink-500">About</a></li>
+                <li><a href="#" class="text-gray-700 hover:text-pink-500">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 🌟 Service Details Section -->
+    <section class="container mx-auto py-12 px-6">
+        {% if service %}
+        <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-xl">
+            
+            <input type="hidden" value={{service.servicer_user_id}}>
+            <!-- Service Image -->
+            <img src="{{ service.service_image }}" 
+                 alt="{{ service.service_name }}" 
+                 class="w-full h-80 object-cover rounded-lg shadow-lg">
+
+            <!-- Service Info -->
+            <div class="mt-6">
+                <h2 class="text-4xl font-bold text-gray-900">{{ service.service_name }}</h2>
+                <p class="text-lg text-gray-700 mt-2">{{ service.service_description }}</p>
+                <p class="text-2xl font-semibold text-blue-600 mt-4">₹{{ service.service_price }}</p>
+                <p class="text-gray-600 mt-2">📍 Location: {{ service.service_address }}, Pincode: {{ service.city_pincode }}</p>
+            </div>
+
+            <!-- Owner Details -->
+            <div class="mt-6 border-t pt-6">
+                <h3 class="text-2xl font-semibold text-gray-800">Service Provider</h3>
+                <p class="text-gray-700"><strong>Name:</strong> {{ service.owner_name }}</p>
+                <p class="text-gray-700"><strong>Mobile:</strong> {{ service.owner_mobile }}</p>
+                <p class="text-gray-700"><strong>Email:</strong> {{ service.owner_email }}</p>
+                <p class="text-gray-700"><strong>Address:</strong> {{ service.owner_address }}</p>
+            </div>
+
+            <!-- ⭐ Reviews Section -->
+            <div class="mt-8 border-t pt-6">
+                <h3 class="text-2xl font-semibold text-gray-800">Customer Reviews</h3>
+
+                <!-- Total Reviews and Average Rating -->
+                <p class="text-lg text-gray-700 mt-2">
+                    <strong>⭐ Average Rating:</strong> {{ avg_rating|default:"No ratings yet" }} 
+                    <br>
+                    <strong>📢 Total Reviews:</strong> {{ total_reviews }}
+                </p>
+
+                <!-- Display Existing Reviews -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    {% for review in reviews %}
+                    <div class="bg-gray-100 p-4 rounded-lg shadow-lg">
+                        <p class="text-lg font-semibold text-blue-700">⭐ {{ review.rating }}</p>
+                        <p class="text-gray-700 italic">"{{ review.review }}"</p>
+                        <p class="text-sm text-gray-600 mt-1">- {{ review.user_name }}, {{ review.date }}</p>
+                    </div>
+                    {% empty %}
+                    <p class="text-gray-500">No reviews yet. Be the first to review!</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 🌟 Add Review Form -->
+            <div class="mt-8 border-t pt-6">
+                <h3 class="text-2xl font-semibold text-gray-800">Submit Your Review</h3>
+                <form action="{% url 'submit_review' service.service_id %}" method="POST" class="mt-4">
+                    {% csrf_token %}
+                    
+                    <label for="rating" class="block text-lg font-medium text-gray-700">⭐ Rating (1-5)</label>
+                    <select name="rating" id="rating" class="mt-2 w-full p-3 border rounded-lg">
+                        <option value="5">5 - Excellent</option>
+                        <option value="4">4 - Good</option>
+                        <option value="3">3 - Average</option>
+                        <option value="2">2 - Poor</option>
+                        <option value="1">1 - Bad</option>
+                    </select>
+
+                    <label for="review" class="block text-lg font-medium text-gray-700 mt-4">📝 Your Review</label>
+                    <textarea name="review" id="review" rows="4" required
+                        class="mt-2 w-full p-3 border rounded-lg"></textarea>
+
+                    <button type="submit"
+                        class="bg-blue-600 text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-blue-700 mt-4">
+                        Submit Review
+                    </button>
+                </form>
+            </div>
+
+            <!-- 🌟 Book Now Button -->
+            <div class="mt-8 flex justify-center">
+                <a href="{% url 'booking' service.service_id service.servicer_user_id %}" 
+                   class="bg-green-600 text-white text-xl py-3 px-8 rounded-lg shadow-lg hover:bg-green-700 transition">
+                    📅 Book Now
+                </a>
+            </div>
+
+        </div>
+        {% else %}
+        <p class="text-center text-gray-500 text-lg">⚠️ Service not found.</p>
+        {% endif %}
+    </section>
+
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicer Dashboard | Event Finder</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script>
+        function confirmDelete(serviceId) {
+            if (confirm("Are you sure you want to delete this service?")) {
+                document.getElementById('deleteForm' + serviceId).submit();
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #f8f9fa; }
+        .table th, .table td { text-align: center; vertical-align: middle; }
+        .btn { margin: 3px; }
+        .service-img {
+            width: 80px; height: 80px; object-fit: cover; border-radius: 5px;
+        }
+        .calendar-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .calendar-container img {
+            width: 90%; /* Adjust image width */
+            max-width: 700px; /* Limit max width */
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand text-primary fw-bold" href="#">🎟️ Event Finder</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="servicer_dashbord.html">🏠 Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="services.html">🛠️ Services</a></li>
+                    <li class="nav-item"><a class="nav-link text-danger fw-bold" href="servicer_login.html">🚪 Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="text-center py-4 bg-primary text-white">
+        <h2>📌 Manage Your Bookings</h2>
+        <p>Add, update, and manage your services easily.</p>
+    </header>
+
+    <!-- Calendar Display Section -->
+    <div class="container calendar-container">
+        <h3 class="text-center text-dark">📅 Booking Calendar</h3>
+        <hr>
+        {% if image_url %}
+            <img src="\media\event_calendar.png" alt="Event Calendar">
+        {% else %}
+            <p class="text-center text-muted">No calendar data available.</p>
+        {% endif %}
+    </div>
+
+    <!-- Services Section -->
+    <div class="container mt-5">
+        <h3 class="text-center text-dark">📋 Booking Listings</h3>
+        <hr>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>User ID</th>
+                        <th>Booker Name</th>
+                        <th>Booker Email</th>
+                        <th>Booker Mobile</th>
+                        <th>Booker Address</th>
+                        <th>Category</th>
+                        <th>Booking Date</th>
+                        <th>Booking Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if booking_list %}
+                        {% for book in booking_list %}
+                            <tr>
+                                <td>{{ book.booking_id }}</td>
+                                <td>{{ book.user_id }}</td>
+                                <td>{{ book.booker_name }}</td>
+                                <td>{{ book.booker_email }}</td>
+                                <td>{{ book.booker_mobile }}</td>
+                                <td>{{ book.booker_address }}</td>
+                                <td>{{ book.category }}</td>
+                                <td>{{ book.booking_date }}</td>
+                                <td>{{ book.booking_time }}</td>
+                                <td>
+                                    <a href="{% url 'accept_booking' book.booking_id %}" class="btn btn-warning">✏️ Accept</a>
+                                    <a href="{% url 'cancel_booking' book.booking_id %}"  class="btn btn-danger">🗑️ Cancel</a>
+                             
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="9" class="text-muted text-center">No bookings found.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
