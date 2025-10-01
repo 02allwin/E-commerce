@@ -11,6 +11,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponseBadRequest
+from home.chatbot import *
 
 username = None
 url =None
@@ -83,6 +84,7 @@ def service_details(request, service_id):
     service_data ,reviews ,avg,count = get_service_details(service_id)
     return render(request, 'Users/services_details.html', {'service': service_data ,'reviews':reviews,'avg_rating':avg,'total_reviews':count})
 
+
 def submit_review(request, service_id):
     # Fetch service details
     service_data, reviews, avg, count = get_service_details(service_id)
@@ -124,59 +126,83 @@ def submit_review(request, service_id):
 
 def service_list(request):
     user_id = request.session.get('user_id')
-    if  not user_id:
+    if not user_id:
         return render(request, 'Users/login.html')
-    
-    
-    available_data=available_datas()
-    choose={
-        "cities":available_data["cities"],
-        "service_type":available_data["categories"],
-        }
+
+    available_data = available_datas()
+    choose = {
+        "service_type": available_data["categories"],
+    }
+
+    services = []
+    responses = None
+    user_message = None
+
+    # GET request → load all services
     if request.method == 'GET':
-        conn,cursor =connect()
-        cursor.execute("SELECT service_id, service_name, service_description, service_price, service_image, city_pincode FROM service")
+        conn, cursor = connect()
+        cursor.execute(
+            "SELECT service_id, service_name, service_description, service_price, service_image, city_pincode FROM service"
+        )
         data = cursor.fetchall()
-        # Convert tuples to list of dictionaries
         services = [
             {
                 'service_id': row[0],
                 'service_name': row[1],
                 'service_description': row[2],
                 'service_price': row[3],
-                'serimage': row[4],  # Ensure this matches the column name in DB
+                'serimage': row[4],
                 'city_pincode': row[5]
-            } for row in data
+            }
+            for row in data
         ]
 
-       
-        return render(request, 'Users/services.html', {'services': services,"choose":choose})
+    # POST request
+    elif request.method == "POST":
+        # Case 1: Chatbot message
+        if "user" in request.POST:
+            user_message = request.POST['user']
+            model = ChatBot(user_message)
+            run_query = RunQuery()
+            sql, val = model.get_query()
+            print(sql, val)
+            responses = run_query.run_chatbot_query(sql, val)
 
-    else:
-        try:
-            cities = request.POST['city']
-            category= request.POST['category']
-            
-            filtered_data = apply_filter(cities ,category)
-            if filtered_data:
-                services = [
-                    {
-                        'service_id': row[0],
-                        'service_name': row[1],
-                        'service_description': row[2],
-                        'service_price': row[3],
-                        'serimage': row[4],
-                        'city_pincode': row[5]
-                    }
-                    for row in filtered_data
-                ]
-            else:
-                services = []
+        # Case 2: Filters
+        else:
+            try:
+                category = request.POST.get('category', '')
+                city = request.POST.get('city', '')
 
-            return render(request, 'Users/services.html', {'services': services, "choose": choose})
+                filtered_data = apply_filter(city, category)
+                if filtered_data:
+                    services = [
+                        {
+                            'service_id': row[0],
+                            'service_name': row[1],
+                            'service_description': row[2],
+                            'service_price': row[3],
+                            'serimage': row[4],
+                            'city_pincode': row[5]
+                        }
+                        for row in filtered_data
+                    ]
+                else:
+                    services = []
 
-        except Exception as e:
-            return render(request, 'Users/services.html', {'error': e})
+            except Exception as e:
+                return render(request, 'Users/services.html', {'error': str(e)})
+
+    return render(
+        request,
+        'Users/services.html',
+        {
+            'services': services,
+            'choose': choose,
+            'responses': responses,
+            'user_message': user_message
+        }
+    )
 
 def book_service(request):
     return render(request, 'Users/book_service.html')
@@ -201,15 +227,14 @@ def booking(request,service_id,servicer_user_id):
             booker_email=request.POST['booker_email']
             category_name = request.POST['category_name']
             price = request.POST['price']
-            other = request.POST['other']
             
             print(service_id,servicer_user_id ,user_id,booker_name,
                                        booker_email,contact_number,address,
-                                       category_name,price,booking_date,booking_time,other)
+                                       category_name,price,booking_date,booking_time)
             
             valBool = booking_category(service_id,servicer_user_id ,user_id,booker_name,
                                        booker_email,contact_number,address,
-                                       category_name,price,booking_date,booking_time,other)
+                                       category_name,price,booking_date,booking_time)
             if valBool:
                 return render(request, 'Users/booking_success.html')
             else:
@@ -276,6 +301,25 @@ def delete_booking(request,booking_id):
     except Exception as e:
         print("Error ",e)
         return render(request, 'Users/view_booking_list.html')
+    
+    
+
+def chatBot(request):
+    if request.method=="POST":
+
+        message = request.POST['user']
+
+        model = ChatBot(message)
+        run_query = RunQuery()
+        sql,val =model.get_query()
+        print(sql,val)
+        responses =  run_query.run_chatbot_query(  sql,val )
+        
+        return render(request,"Users/chatbot.html",{'responses':responses})
+    else:
+        return render(request ,'Users/chatbot.html')
+    
+
 # Servicer Action
 
 def servicer_login_view(request):
@@ -432,24 +476,35 @@ def add_service(request):
             print("Error:", str(e))
             return render(request, 'Servicer/add_service.html', {'message': str(e)})
 
+def delete_service_request(request,service_id):
+    servicer_user_id = request.session.get('servicer_user_id')
+    if not servicer_user_id:
+        return render(request, 'Servicer/servicer_login.html')
+  
+    try:
+        flag = delete_service(service_id)
+        if flag:
+            return redirect("services")
+        else:
+            return render(request ,"Servicer/services.html",{"error_msg":1})
+        
+    except Exception as e:
+        print("Error 2",e)
+        return render(request ,'Servicer/services.html')
+    
 def request_bookings(request):
     servicer_user_id = request.session.get('servicer_user_id')
     if not servicer_user_id:
         return render(request, 'Servicer/servicer_login.html')
-    url=0
+  
     try:
         if request.method == "GET":
             print("hi")
             print(servicer_user_id)
             
-            url = view_calender(servicer_user_id)
             
             bookings= view_bookings_from_servicer(servicer_user_id)
-            print(booking)
-            print("URL ",url)
-            if not url:
-                url =0
-            print(url)
+            
             if bookings:
                 booking_list=[
                     {
@@ -465,9 +520,9 @@ def request_bookings(request):
                     } for booking in bookings 
                 ]
                 print(booking_list)
-                return render(request, 'Servicer/view_bookings.html', {'booking_list': booking_list,'image_url':1})
+                return render(request, 'Servicer/view_bookings.html', {'booking_list': booking_list})
             else:
-                return render(request, 'Servicer/view_bookings.html',{"booking_list":0,"image_url":url})
+                return render(request, 'Servicer/view_bookings.html',{"booking_list":0})
         else:
             return render(request, 'Servicer/view_bookings.html',{"booking_list":0})
     except Exception as e:

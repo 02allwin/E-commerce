@@ -34,8 +34,7 @@ urlpatterns = [
     path('Users/booking/<int:service_id>/<int:servicer_user_id>/', views.booking, name='booking'),
     path('Users/view_booking_list.html',views.view_bookings,name="view_bookings"),
     path('Users/delete_booking/<int:booking_id>/',views.delete_booking,name="delete_booking"),
-    
-    
+    path("Users/chatbot.html",views.chatBot ,name='chatBot'),
     
     path('services/<int:service_id>/submit_review/', views.submit_review, name='submit_review'),
     path('Servicer/servicer_login.html', views.servicer_login_view, name='servicer_login_view'),
@@ -44,6 +43,7 @@ urlpatterns = [
     path("Servicer/add_service.html",views.add_service,name="add_service"),
     path("Servicer/services.html",views.services,name="services"),
     path('add_service/', views.add_service, name='add_service'),
+    path('delete_service_request/<int:service_id>',views.delete_service_request ,name="delete_service_request"),
     
     path('Servicer/view_bookings.html',views.request_bookings,name="request_bookings"),
     path('Servicer/logout.html', views.logout_view, name='logout'),

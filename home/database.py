@@ -7,7 +7,7 @@ def connect():
             user='root',
             password='root',
             host='127.0.0.1',
-            database='local_event_finder',
+            database='ecommerse',
             charset='utf8'
         )
         cnx_cur = cnx.cursor()

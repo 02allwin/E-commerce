@@ -84,6 +84,20 @@ def inserService(sername,serDesc,serPrice,serImage,cityPin,serAdd,categoryId,ser
     except Exception as e:
         print(f"Error: {e}")
 
+def delete_service(service_id):
+    try:
+        con,cur = connect()
+
+        sql = "delete  from service where service_id=%s"
+        val=(service_id,)
+        cur.execute(sql,val)
+        con.commit()
+        return True
+
+    except Exception as e:
+        print("Error ",e)
+        return False
+
 def getPineCode_ID(pincode):
     try:
         con,cur = connect()
@@ -141,41 +155,6 @@ def collect_date(servicer_id):
     data = cur.fetchall()
     return data
 
-def view_calender(servicer_id):
-    
-    try:
-        df = collect_date(servicer_id)
-        print(df)
-        if df:
-
-            df = pd.DataFrame(df, columns=["date", "time", "status"])
-
-            # Convert Timedelta to HH:MM:SS
-            df['time'] = df['time'].apply(lambda x: str(pd.Timedelta(x)).split()[-1])
-
-            # Create datetime column
-            df["datetime"] = pd.to_datetime(df["date"].astype(str) + " " + df["time"])
-
-            # Count events per day (for marking calendar)
-            df_count = df.groupby("date").size()
-            
-        
-            df_count.index = pd.to_datetime(df_count.index)
-            # Plot Calendar Heatmap
-            fig, ax = calplot.calplot(df_count, cmap="coolwarm", colorbar=True, suptitle="Event Calendar")
-
-            image_path =  "event_calendar.png"
-            path = os.path.join(os.getcwd(),'media', image_path)
-            fig.savefig(path, dpi=300, bbox_inches="tight")
-
-            # Show the plot
-            #plt.show()
-            return path
-        else:
-            print("No data ")
-    except Exception as e:
-        print(f"Error2: {e}")
-        
 def change_booking_status(booking_id,status):
     try:
         print(status,booking_id)
@@ -186,6 +165,3 @@ def change_booking_status(booking_id,status):
         con.commit()
     except Exception as e:
         print(f"Error: {e}")
-    
-
-

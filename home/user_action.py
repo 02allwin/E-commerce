@@ -163,41 +163,19 @@ def get_service_details(service_id):
     except Exception as e:
         print(e)
 
-def booking_category(service_id,service_user_id , user_id, booker_name, email, mobile, address, category_name,price, date, time, other_value):
+def booking_category(service_id,service_user_id , user_id, booker_name, email, mobile, address, category_name,price, date, time):
     try:
         con, cursor = connect()  # Ensure this function returns a valid DB connection
         
         print(category_name)
-        set1 = {"Hall", "Conference Rooms", "Private Party Venues"}
         
         # Define query and data dynamically
-        if category_name in set1:
+        if category_name:
             query = """
-                INSERT INTO bookings (service_id,servicer_user_id, user_id, booker_name, email, mobile, address, category_name,price, date, time, guests)
-                VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s)
+                INSERT INTO bookings (service_id,servicer_user_id, user_id, booker_name, email, mobile, address, category_name,price, date, time)
+                VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s,%s)
             """
-            data = (service_id,service_user_id , user_id, booker_name, email, mobile, address, category_name,price, date, time, other_value)
-        
-        elif category_name == "DJ Services":
-            query = """
-                INSERT INTO bookings (service_id,servicer_user_id, user_id, booker_name, email, mobile, address, category_name,price, date, time, dj_name)
-                VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s)
-            """
-            data = (service_id,service_user_id , user_id, booker_name, email, mobile, address, category_name,price, date, time, other_value)
-
-        elif category_name == "Wedding & Stage Decoration":
-            query = """
-                INSERT INTO bookings (service_id,servicer_user_id, user_id, booker_name, email, mobile, address, category_name,price, date, time, theme)
-                VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s)
-            """
-            data = (service_id,service_user_id , user_id, booker_name, email, mobile, address, category_name,price, date, time, other_value)
-
-        elif category_name == "Birthday Party":
-            query = """
-                INSERT INTO bookings (service_id,servicer_user_id,  user_id,booker_name, email, mobile, address, category_name,price, date, time, birthday_age)
-                VALUES (%s, %s,%s, %s, %s, %s, %s, %s, %s, %s,%s,%s)
-            """
-            data = (service_id,service_user_id , user_id, booker_name, email, mobile, address, category_name,price, date, time, other_value)
+            data = (service_id,service_user_id , user_id, booker_name, email, mobile, address, category_name,price, date, time)
         
         else:
             print("Invalid category!")

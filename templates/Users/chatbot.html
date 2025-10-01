@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products | E-Commerce</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+    .chat-container { width: 360px; max-height: 500px; background: #fff; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; }
+    .chat-header { background: #ec4899; color: white; padding: 10px; font-weight: bold; text-align: center; }
+    .chat-messages { flex: 1; padding: 10px; overflow-y: auto; background: #f3f4f6; }
+    .message { margin-bottom: 10px; display: flex; flex-direction: column; }
+    .message.user { align-items: flex-end; }
+    .message.user .text { background: #ec4899; color: white; padding: 8px 12px; border-radius: 20px 20px 0 20px; max-width: 80%; word-wrap: break-word; }
+    .message.bot .text { background: #e5e7eb; color: #111827; padding: 8px 12px; border-radius: 20px 20px 20px 0; max-width: 80%; word-wrap: break-word; }
+    .message.bot img { max-width: 120px; margin-top: 5px; border-radius: 5px; }
+    .message.bot a { display: inline-block; margin-top: 5px; padding: 4px 8px; background: #ec4899; color: white; text-decoration: none; border-radius: 5px; }
+    #chatToggle { position: fixed; bottom: 20px; right: 20px; background: #ec4899; color: white; border-radius: 50%; width: 50px; height: 50px; font-size: 24px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);}
+    #chatPopup { position: fixed; bottom: 80px; right: 20px; display: none; flex-direction: column; }
+</style>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-md p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="#" class="text-xl font-bold text-pink-500">E-Commerce</a>
+            <div>
+                <a href="services.html" class="text-gray-700 hover:text-pink-500">All Products</a>
+                <a href="view_booking_list.html" class="text-gray-700 hover:text-pink-500">Orders</a>
+                <a href="#" class="text-gray-700 hover:text-pink-500">About</a>
+                <a href="#" class="text-gray-700 hover:text-pink-500">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="text-center py-12 bg-gradient-to-r from-purple-100 to-pink-100">
+        <h1 class="text-4xl font-bold text-gray-800">Order the Best Products</h1>
+        <p class="text-gray-600 mt-2">Compare and book event Electronic and  Home Automation</p>
+    </header>
+
+    <!-- Filter Section -->
+    <form  method="post" name="filter">
+        {%csrf_token%}
+    <div class="container mx-auto px-6 mt-8">
+        <div class="bg-white p-4 rounded-lg shadow-md flex flex-wrap gap-4 justify-center">
+
+            <!-- Category Filter -->
+            <select name="category" id="filterCategory" class="border p-2 rounded-lg">
+                <option value="">Choose Category</option>
+                {% for category in choose.service_type %}
+                    <option value="{{ category }}">{{ category }}</option>
+                {% endfor %}
+            </select>
+            
+            <!-- Price Filter -->
+            <select id="filterPrice" class="border p-2 rounded-lg">
+                <option value="">Choose Price</option>
+                <option value="low">₹0 - ₹5000</option>
+                <option value="medium">₹5000 - ₹20000</option>
+                <option value="high">₹20000+</option>
+            </select>
+            <button type="reset" id="clearFilters" class="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400">
+                Clear Filters
+            </button>
+            <button type="submit" id="clearFilters" class="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400">
+                Apply
+            </button>
+        </div>
+    </div>
+
+
+    </form>
+
+    <!-- Services Section -->
+    <section class="container mx-auto py-12 px-6">
+        <h2 class="text-3xl font-semibold text-gray-800 mb-6 text-center">Available Products</h2>
+
+        <div id="servicesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for service in services %}
+            
+            <div class="service-card bg-white p-4 rounded-lg shadow-md"
+                 data-city="{{ service.city_pincode }}"
+                 data-category="{{ service.category }}">
+                 
+                <img src="{{ service.serimage }}" alt="{{ service.service_name }}" class="w-full h-48 object-cover rounded-md">
+                <h3 class="text-xl font-semibold text-gray-800 mt-4">{{ service.service_name }}</h3>
+                <p class="text-gray-600">{{ service.city_pincode }}</p>
+                <p class="text-gray-500 text-sm">{{ service.service_description }}</p>
+                <p class="text-gray-800 font-bold mt-2">₹{{ service.service_price }}</p>
+                <p class="text-yellow-500">⭐  / 5</p>
+                <a href="{% url 'service_details' service.service_id %}" class="bg-pink-500 text-white py-2 px-4 rounded-lg mt-4 hover:bg-pink-600 block text-center">
+                    View Details
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+
+
+    
+    <!-- JavaScript for Filtering -->
+    
+<!-- Chat Button -->
+<div id="chatToggle">💬</div>
+
+<!-- Chat Popup -->
+<div id="chatPopup" class="chat-container">
+    <div class="chat-header">
+        Chat with us
+        <button id="closeChat" class="float-right text-white font-bold">✖</button>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+        {% if user_message %}
+        <div class="message user">
+            <div class="text">{{ user_message }}</div>
+        </div>
+        {% endif %}
+
+        {% if responses %}
+            {% for response in responses %}
+            <div class="message bot">
+                <div class="text">{{ response.service_name }}</div>
+                {% if response.serimage %}
+                    <img src="{{ response.serimage }}">
+                {% endif %}
+                <div class="text">₹{{ response.service_price }}</div>
+                <a href="{% url 'service_details' response.service_id %}">View Details</a>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <form method="post" name="chatbot" class="flex border-t border-gray-200">
+        {% csrf_token %}
+        <input type="text" name="user" placeholder="Type a message..." class="flex-1 p-2 outline-none">
+        <button type="submit" class="bg-pink-500 text-white px-4 hover:bg-pink-600">Send</button>
+    </form>
+</div>
+
+<script>
+const chatToggle = document.getElementById("chatToggle");
+const chatPopup = document.getElementById("chatPopup");
+const closeChat = document.getElementById("closeChat");
+
+chatToggle.addEventListener("click", () => {
+    chatPopup.style.display = "flex";
+});
+
+closeChat.addEventListener("click", () => {
+    chatPopup.style.display = "none";
+});
+</script>
+
+
+
+</body>
+</html>
