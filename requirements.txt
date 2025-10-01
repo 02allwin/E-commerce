@@ -1,6 +1,7 @@
 django
 mysql
 mysql-connector
-pandas
-calplot
 numpy
+spacy
+
+#python -m spacy download en_core_web_sm
